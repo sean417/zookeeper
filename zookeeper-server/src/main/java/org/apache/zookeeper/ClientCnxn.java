@@ -432,7 +432,7 @@ public class ClientCnxn {
             replaceAll("-EventThread", "");
         return name + suffix;
     }
-
+    //这个线程
     class EventThread extends ZooKeeperThread {
         private final LinkedBlockingQueue<Object> waitingEvents =
             new LinkedBlockingQueue<Object>();
@@ -628,7 +628,7 @@ public class ClientCnxn {
                                   .getChildren(), rsp.getStat());
                       } else {
                           cb.processResult(rc, clientPath, p.ctx, null, null);
-                      }
+                      }//创建节点返回处理
                   } else if (p.response instanceof CreateResponse) {
                       StringCallback cb = (StringCallback) p.cb;
                       CreateResponse rsp = (CreateResponse) p.response;
@@ -712,10 +712,12 @@ public class ClientCnxn {
         }
 
         if (p.cb == null) {
+            //同步让notify wait的线程
             synchronized (p) {
                 p.finished = true;
                 p.notifyAll();
             }
+            //异步放入waitingEventsQueue队列
         } else {
             p.finished = true;
             eventThread.queuePacket(p);
@@ -809,6 +811,7 @@ public class ClientCnxn {
         private boolean isFirstConnect = true;
 
         void readResponse(ByteBuffer incomingBuffer) throws IOException {
+            //反序列化
             ByteBufferInputStream bbis = new ByteBufferInputStream(
                     incomingBuffer);
             BinaryInputArchive bbia = BinaryInputArchive.getArchive(bbis);
@@ -1125,6 +1128,7 @@ public class ClientCnxn {
             InetSocketAddress serverAddress = null;
             while (state.isAlive()) {
                 try {
+                    //判断连接是否有效，
                     if (!clientCnxnSocket.isConnected()) {
                         // don't re-establish connection if we are closing
                         if (closing) {
@@ -1133,7 +1137,7 @@ public class ClientCnxn {
                         if (rwServerAddress != null) {
                             serverAddress = rwServerAddress;
                             rwServerAddress = null;
-                        } else {
+                        } else {//如果无效，拿到下一个节点的地址
                             serverAddress = hostProvider.next(1000);
                         }
                         startConnect(serverAddress);
@@ -1219,7 +1223,7 @@ public class ClientCnxn {
                         }
                         to = Math.min(to, pingRwTimeout - idlePingRwServer);
                     }
-
+                    //把数据写到socket里，并把数据放到pendingQueue，并删除outgoingQueue里的数据。
                     clientCnxnSocket.doTransport(to, pendingQueue, ClientCnxn.this);
                 } catch (Throwable e) {
                     if (closing) {
@@ -1517,8 +1521,10 @@ public class ClientCnxn {
             WatchDeregistration watchDeregistration)
             throws InterruptedException {
         ReplyHeader r = new ReplyHeader();
+        //封装packet同时入队outgoingQueue
         Packet packet = queuePacket(h, r, request, response, null, null, null,
                 null, watchRegistration, watchDeregistration);
+        //同步发送，锁等待
         synchronized (packet) {
             if (requestTimeout > 0) {
                 // Wait for request completion with timeout
