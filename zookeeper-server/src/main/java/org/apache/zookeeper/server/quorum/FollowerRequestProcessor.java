@@ -93,6 +93,7 @@ public class FollowerRequestProcessor extends ZooKeeperCriticalThread implements
                 case OpCode.setACL:
                 case OpCode.multi:
                 case OpCode.check:
+                    //foward给leader
                     zks.getFollower().request(request);
                     break;
                 case OpCode.createSession:
@@ -109,7 +110,7 @@ public class FollowerRequestProcessor extends ZooKeeperCriticalThread implements
         }
         LOG.info("FollowerRequestProcessor exited loop!");
     }
-
+    //入队
     public void processRequest(Request request) {
         if (!finished) {
             // Before sending the request, check if the request requires a

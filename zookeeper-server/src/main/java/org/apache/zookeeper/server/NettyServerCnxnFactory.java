@@ -263,6 +263,7 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
                     if (cnxn == null) {
                         LOG.error("channelRead() on a closed or closing NettyServerCnxn");
                     } else {
+                        //消息处理
                         cnxn.processMessage((ByteBuf) msg);
                     }
                 } catch (Exception ex) {

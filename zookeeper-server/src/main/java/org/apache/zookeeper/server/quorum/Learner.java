@@ -168,6 +168,7 @@ public class Learner {
     
     /**
      * send a request packet to the leader
+     * 给leader转发写请求
      *
      * @param request
      *                the request from the client
@@ -190,6 +191,7 @@ public class Learner {
         oa.close();
         QuorumPacket qp = new QuorumPacket(Leader.REQUEST, -1, baos
                 .toByteArray(), request.authInfo);
+        //写入socket里
         writePacket(qp, true);
     }
     

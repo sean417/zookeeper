@@ -357,6 +357,7 @@ public class NettyServerCnxn extends ServerCnxn {
                 appendToQueuedBuffer(buf.retainedDuplicate());
                 processQueuedBuffer();
             } else {
+                //接收消息
                 receiveMessage(buf);
                 // Have to check !closingChannel, because an error in
                 // receiveMessage() could have led to close() being called.
@@ -474,7 +475,9 @@ public class NettyServerCnxn extends ServerCnxn {
                             throw new IOException("ZK down");
                         }
                         if (initialized) {
+
                             // TODO: if zks.processPacket() is changed to take a ByteBuffer[],
+                            // 接收到了完整的消息，接下来zk的方法解析
                             // we could implement zero-copy queueing.
                             zks.processPacket(this, bb);
 

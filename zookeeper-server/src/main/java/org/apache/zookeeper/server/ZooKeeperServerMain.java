@@ -107,7 +107,7 @@ public class ZooKeeperServerMain {
     }
 
     /**
-     * Run from a ServerConfig.
+     * Run from a ServerConfig.zookeeper节点的初始化
      * @param config ServerConfig to use.
      * @throws IOException
      * @throws AdminServerException
@@ -141,6 +141,7 @@ public class ZooKeeperServerMain {
             if (config.getClientPortAddress() != null) {
                 cnxnFactory = ServerCnxnFactory.createFactory();
                 cnxnFactory.configure(config.getClientPortAddress(), config.getMaxClientCnxns(), false);
+                //开始网络通讯
                 cnxnFactory.startup(zkServer);
                 // zkServer has been started. So we don't need to start it again in secureCnxnFactory.
                 needStartZKServer = false;

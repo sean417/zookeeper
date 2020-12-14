@@ -171,13 +171,20 @@ public class CommitProcessor extends ZooKeeperCriticalThread implements
                  * Processing queuedRequests: Process the next requests until we
                  * find one for which we need to wait for a commit. We cannot
                  * process a read request while we are processing write request.
+                 *
+                 * 处理queuedRequests队列里的请求：除非有一个需要提交的请求，否则一直执行。
+                 * 因为我们不能再处理一个写请求的时候处理一个读请求。
                  */
+
+                //如果没等待提交，没正在执行提交，就从队列拿出一个请求
                 while (!stopped && !isWaitingForCommit() &&
                        !isProcessingCommit() &&
                        (request = queuedRequests.poll()) != null) {
+                    //写请求进行pending
                     if (needCommit(request)) {
                         nextPending.set(request);
                     } else {
+                        //读请求
                         sendToNextProcessor(request);
                     }
                 }
@@ -186,6 +193,8 @@ public class CommitProcessor extends ZooKeeperCriticalThread implements
                  * Processing committedRequests: check and see if the commit
                  * came in for the pending request. We can only commit a
                  * request when there is no other request being processed.
+                 *
+                 * 如果是写请求上面的loop退出，处理写请求。
                  */
                 processCommitted();
             }
@@ -201,7 +210,7 @@ public class CommitProcessor extends ZooKeeperCriticalThread implements
      */
     protected void processCommitted() {
         Request request;
-
+        //只有当没有处理请求任务的时候，才能处理新的提交请求
         if (!stopped && !isProcessingRequest() &&
                 (committedRequests.peek() != null)) {
 
@@ -222,6 +231,8 @@ public class CommitProcessor extends ZooKeeperCriticalThread implements
              * properly.
              */
             Request pending = nextPending.get();
+            //对写请求和提交请求进行匹配。
+            //如果匹配上了就是本节点的提交请求，如果不是就是其他节点的提交请求（保持各个节点一致）。
             if (pending != null &&
                 pending.sessionId == request.sessionId &&
                 pending.cxid == request.cxid) {
@@ -239,6 +250,7 @@ public class CommitProcessor extends ZooKeeperCriticalThread implements
             } else {
                 // this request came from someone else so just
                 // send the commit packet
+                // 不是就是其他节点的提交请求,直接操作
                 currentlyCommitting.set(request);
                 sendToNextProcessor(request);
             }
@@ -329,7 +341,9 @@ public class CommitProcessor extends ZooKeeperCriticalThread implements
         if (LOG.isDebugEnabled()) {
             LOG.debug("Committing request:: " + request);
         }
+        //把提交请求放入queuedRequests队里
         committedRequests.add(request);
+        //没有写请求唤醒run方法的wait()
         if (!isProcessingCommit()) {
             wakeup();
         }
@@ -343,7 +357,9 @@ public class CommitProcessor extends ZooKeeperCriticalThread implements
         if (LOG.isDebugEnabled()) {
             LOG.debug("Processing request:: " + request);
         }
+        //把请求放入queuedRequests队里
         queuedRequests.add(request);
+        //如果没有等待被提交，就把run里的wait终止掉。
         if (!isWaitingForCommit()) {
             wakeup();
         }

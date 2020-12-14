@@ -122,7 +122,7 @@ public abstract class ServerCnxnFactory {
     }
 
     public abstract void closeAll();
-    
+    //根据配置项(nio或netty)创建连接工厂.
     static public ServerCnxnFactory createFactory() throws IOException {
         String serverCnxnFactoryName =
             System.getProperty(ZOOKEEPER_SERVER_CNXN_FACTORY);
