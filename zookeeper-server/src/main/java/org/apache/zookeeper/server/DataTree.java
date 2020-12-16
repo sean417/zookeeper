@@ -85,9 +85,9 @@ public class DataTree {
      */
     private final ConcurrentHashMap<String, DataNode> nodes =
         new ConcurrentHashMap<String, DataNode>();
-
+    //数据watch
     private final WatchManager dataWatches = new WatchManager();
-
+    //child的watch
     private final WatchManager childWatches = new WatchManager();
 
     /** the root of zookeeper tree */
@@ -626,6 +626,7 @@ public class DataTree {
           this.updateBytes(lastPrefix, (data == null ? 0 : data.length)
               - (lastdata == null ? 0 : lastdata.length));
         }
+        //服务端激发watch
         dataWatches.triggerWatch(path, EventType.NodeDataChanged);
         return s;
     }
@@ -659,6 +660,7 @@ public class DataTree {
         synchronized (n) {
             n.copyStat(stat);
             if (watcher != null) {
+                //服务端吧watcher注册上
                 dataWatches.addWatch(path, watcher);
             }
             return n.data;

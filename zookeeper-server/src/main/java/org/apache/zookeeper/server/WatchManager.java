@@ -39,10 +39,10 @@ import org.slf4j.LoggerFactory;
  */
 class WatchManager {
     private static final Logger LOG = LoggerFactory.getLogger(WatchManager.class);
-
+    //服务端path和Watcher集合的对应关系
     private final HashMap<String, HashSet<Watcher>> watchTable =
         new HashMap<String, HashSet<Watcher>>();
-
+    //服务端Watcher和path集合的对应关系
     private final HashMap<Watcher, HashSet<String>> watch2Paths =
         new HashMap<Watcher, HashSet<String>>();
 
@@ -115,6 +115,7 @@ class WatchManager {
                 }
             }
         }
+        //触发所有跟这个path关联的watch
         for (Watcher w : watchers) {
             if (supress != null && supress.contains(w)) {
                 continue;

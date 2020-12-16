@@ -153,6 +153,7 @@ public class NettyServerCnxn extends ServerCnxn {
         }
 
         // Convert WatchedEvent to a type that can be sent over the wire
+        // 把watch触发的信息发送给客户端
         WatcherEvent e = event.getWrapper();
 
         try {

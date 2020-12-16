@@ -473,6 +473,7 @@ public class ClientCnxn {
             }
             WatcherSetEventPair pair = new WatcherSetEventPair(watchers, event);
             // queue the pair (watch set & event) for later processing
+            //把watch set & event 的pair提交给waitingEvents
             waitingEvents.add(pair);
         }
 
@@ -503,6 +504,7 @@ public class ClientCnxn {
            try {
               isRunning = true;
               while (true) {
+                  //从队列拿出watch的事件
                  Object event = waitingEvents.take();
                  if (event == eventOfDeath) {
                     wasKilled = true;
@@ -528,7 +530,7 @@ public class ClientCnxn {
        private void processEvent(Object event) {
           try {
               if (event instanceof WatcherSetEventPair) {
-                  // each watcher will process the event
+                  // each watcher will process the event 处理所有watch通知
                   WatcherSetEventPair pair = (WatcherSetEventPair) event;
                   for (Watcher watcher : pair.watchers) {
                       try {
@@ -684,6 +686,7 @@ public class ClientCnxn {
     // @VisibleForTesting
     protected void finishPacket(Packet p) {
         int err = p.replyHeader.getErr();
+        //根据服务端返回的信息，判断如果服务端注册成功了，客户端也注册watch
         if (p.watchRegistration != null) {
             p.watchRegistration.register(err);
         }
@@ -849,6 +852,7 @@ public class ClientCnxn {
                     LOG.debug("Got notification sessionid:0x"
                         + Long.toHexString(sessionId));
                 }
+                //拿到watch event
                 WatcherEvent event = new WatcherEvent();
                 event.deserialize(bbia, "response");
 
@@ -865,13 +869,13 @@ public class ClientCnxn {
                     			+ chrootPath);
                     }
                 }
-
+                //watch event变为WatchedEvent
                 WatchedEvent we = new WatchedEvent(event);
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Got " + we + " for sessionid 0x"
                             + Long.toHexString(sessionId));
                 }
-
+                //把WatchedEvent发送给eventThread处理
                 eventThread.queueEvent( we );
                 return;
             }
