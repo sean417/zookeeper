@@ -1250,7 +1250,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                        updateServerState();
                     }
                     break;
-                case FOLLOWING://节点处于following状态
+                case FOLLOWING://节点处于following状态的网络动作
                     try {
                        LOG.info("FOLLOWING");
                         setFollower(makeFollower(logFactory));
@@ -1263,10 +1263,12 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                        updateServerState();
                     }
                     break;
-                case LEADING://节点处于leading状态
+                case LEADING://节点处于leading状态的网络动作：
                     LOG.info("LEADING");
                     try {
+                        //创建Leader对象，并bind socket
                         setLeader(makeLeader(logFactory));
+                        //
                         leader.lead();
                         setLeader(null);
                     } catch (Exception e) {

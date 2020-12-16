@@ -73,7 +73,7 @@ public class Follower extends Learner{
         fzk.registerJMX(new FollowerBean(this, zk), self.jmxLocalPeerBean);
         try {
             QuorumServer leaderServer = findLeader();            
-            try {
+            try {//连接leader
                 connectToLeader(leaderServer.addr, leaderServer.hostname);
                 long newEpochZxid = registerWithLeader(Leader.FOLLOWERINFO);
                 if (self.isReconfigStateChange())

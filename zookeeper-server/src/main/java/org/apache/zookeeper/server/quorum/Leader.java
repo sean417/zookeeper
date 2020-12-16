@@ -391,6 +391,7 @@ public class Leader {
                     Socket s = null;
                     boolean error = false;
                     try {
+                        //建立leader和follower的通讯
                         s = ss.accept();
 
                         // start with the initLimit, once the ack is processed

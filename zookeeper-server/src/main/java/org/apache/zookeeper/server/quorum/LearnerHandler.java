@@ -494,6 +494,7 @@ public class LearnerHandler extends ZooKeeperThread {
             bufferedOutput.flush();
 
             // Start thread that blast packets in the queue to learner
+            // 真正给follower发送写请求的。
             startSendingPackets();
             
             /*
