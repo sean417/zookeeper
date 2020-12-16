@@ -35,17 +35,21 @@ import org.apache.zookeeper.common.Time;
  * to expire connections.
  */
 public class ExpiryQueue<E> {
+    //session和timeOut的mapping
     private final ConcurrentHashMap<E, Long> elemMap =
         new ConcurrentHashMap<E, Long>();
     /**
      * The maximum number of buckets is equal to max timeout/expirationInterval,
      * so the expirationInterval should not be too small compared to the
      * max timeout that this expiry queue needs to maintain.
+     *
+     * bucket和bucket的session的mapping
      */
     private final ConcurrentHashMap<Long, Set<E>> expiryMap =
         new ConcurrentHashMap<Long, Set<E>>();
 
     private final AtomicLong nextExpirationTime = new AtomicLong();
+    //下一次检查session超时的时间
     private final int expirationInterval;
 
     public ExpiryQueue(int expirationInterval) {
@@ -85,6 +89,7 @@ public class ExpiryQueue<E> {
      *                 changed, or null if unchanged
      */
     public Long update(E elem, int timeout) {
+        //更新session新的过期时间
         Long prevExpiryTime = elemMap.get(elem);
         long now = Time.currentElapsedTime();
         Long newExpiryTime = roundToNextInterval(now + timeout);

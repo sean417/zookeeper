@@ -1199,12 +1199,14 @@ public class ClientCnxn {
                         throw new SessionTimeoutException(warnInfo);
                     }
                     if (state.isConnected()) {
+                        //发心跳的条件：
                     	//1000(1 second) is to prevent race condition missing to send the second ping
                     	//also make sure not to send too many pings when readTimeout is small 
                         int timeToNextPing = readTimeout / 2 - clientCnxnSocket.getIdleSend() - 
                         		((clientCnxnSocket.getIdleSend() > 1000) ? 1000 : 0);
                         //send a ping request either time is due or no packet sent out within MAX_SEND_PING_INTERVAL
                         if (timeToNextPing <= 0 || clientCnxnSocket.getIdleSend() > MAX_SEND_PING_INTERVAL) {
+                            //发心跳
                             sendPing();
                             clientCnxnSocket.updateLastSend();
                         } else {
